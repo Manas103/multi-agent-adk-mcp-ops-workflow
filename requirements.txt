@@ -1,0 +1,9 @@
+google-adk==2.11.0
+mcp==2.3.0
+fastapi==0.141.1
+uvicorn[standard]
+psycopg2-binary==2.9.13
+pydantic>=2
+pytest
+pytest-asyncio
+httpx

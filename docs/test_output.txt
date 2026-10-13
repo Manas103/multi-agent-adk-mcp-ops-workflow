@@ -1,0 +1,68 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-9.1.1, pluggy-1.6.0 -- /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow
+configfile: pytest.ini
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 35 items
+
+tests/test_adk_agent_construction.py::test_supervisor_has_four_sub_agents PASSED [  2%]
+tests/test_adk_agent_construction.py::test_each_specialist_toolset_exposes_only_its_scoped_tools PASSED [  5%]
+tests/test_adk_agent_construction.py::test_baseline_agent_exposes_every_tool_from_both_servers PASSED [  8%]
+tests/test_approval_api.py::test_health PASSED                           [ 11%]
+tests/test_approval_api.py::test_pending_and_approve_flow PASSED         [ 14%]
+tests/test_approval_gate.py::test_approving_a_valid_action_mutates_state PASSED [ 17%]
+tests/test_approval_gate.py::test_schema_invalid_action_is_never_approved PASSED [ 20%]
+tests/test_approval_gate.py::test_approving_twice_raises PASSED          [ 22%]
+tests/test_approval_gate.py::test_auto_approve_all_valid_skips_schema_invalid PASSED [ 25%]
+tests/test_mcp_servers.py::test_legacy_directory_server_lists_its_tools PASSED [ 28%]
+tests/test_mcp_servers.py::test_policy_doc_server_lists_its_tools PASSED [ 31%]
+tests/test_mcp_servers.py::test_lookup_employee_real_row PASSED          [ 34%]
+tests/test_mcp_servers.py::test_lookup_employee_missing_row PASSED       [ 37%]
+tests/test_mcp_servers.py::test_propose_revoke_access_valid_queues_a_schema_valid_action PASSED [ 40%]
+tests/test_mcp_servers.py::test_propose_revoke_access_short_reason_is_schema_invalid PASSED [ 42%]
+tests/test_mcp_servers.py::test_search_policies_ranks_by_overlap PASSED  [ 45%]
+tests/test_mcp_servers.py::test_get_policy_found_and_not_found PASSED    [ 48%]
+tests/test_oracle.py::test_revoke_access_fails_until_actually_revoked PASSED [ 51%]
+tests/test_oracle.py::test_recover_asset_requires_matching_ticket PASSED [ 54%]
+tests/test_oracle.py::test_policy_gated_ticket_must_cite_the_correct_doc PASSED [ 57%]
+tests/test_oracle_independence.py::test_oracle_does_not_import_orchestrators_or_servers PASSED [ 60%]
+tests/test_orchestrator.py::test_supervisor_self_reflection_recovers_from_malformed_first_attempt PASSED [ 62%]
+tests/test_orchestrator.py::test_baseline_exceeds_budget_on_status_update PASSED [ 65%]
+tests/test_orchestrator.py::test_supervisor_status_update_succeeds_on_the_same_task PASSED [ 68%]
+tests/test_schemas.py::test_revoke_access_valid PASSED                   [ 71%]
+tests/test_schemas.py::test_revoke_access_short_reason_rejected PASSED   [ 74%]
+tests/test_schemas.py::test_create_ticket_asset_return_requires_asset_id PASSED [ 77%]
+tests/test_schemas.py::test_create_ticket_policy_compliance_requires_doc_id PASSED [ 80%]
+tests/test_schemas.py::test_update_ticket_status_invalid_enum_rejected PASSED [ 82%]
+tests/test_schemas.py::test_unknown_action_type_rejected PASSED          [ 85%]
+tests/test_tool_catalog.py::test_revoke_access_step0_is_unambiguous PASSED [ 88%]
+tests/test_tool_catalog.py::test_recover_asset_step0_is_unambiguous PASSED [ 91%]
+tests/test_tool_catalog.py::test_policy_gated_ticket_step0_is_unambiguous PASSED [ 94%]
+tests/test_tool_catalog.py::test_policy_gated_ticket_step1_wrongly_repeats_search PASSED [ 97%]
+tests/test_tool_catalog.py::test_status_update_step0_wrongly_picks_lookup_employee PASSED [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.10/site-packages/opentelemetry/util/_importlib_metadata.py:32
+  /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/lib/python3.10/site-packages/opentelemetry/util/_importlib_metadata.py:32: DeprecationWarning: SelectableGroups dict interface is deprecated. Use select.
+    return EntryPoints(ep for group_eps in eps.values() for ep in group_eps)
+
+.venv/lib/python3.10/site-packages/google/adk/features/_feature_decorator.py:71
+  /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/lib/python3.10/site-packages/google/adk/features/_feature_decorator.py:71: UserWarning: [EXPERIMENTAL] feature PLUGGABLE_AUTH is enabled.
+    check_feature_enabled()
+
+tests/test_adk_agent_construction.py::test_each_specialist_toolset_exposes_only_its_scoped_tools
+  /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/lib/python3.10/site-packages/google/adk/tools/mcp_tool/mcp_toolset.py:407: UserWarning: [EXPERIMENTAL] feature MCP_GRACEFUL_ERROR_HANDLING is enabled.
+    session = await self._mcp_session_manager.create_session(
+
+tests/test_adk_agent_construction.py: 32 warnings
+  /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/lib/python3.10/site-packages/google/adk/tools/mcp_tool/mcp_toolset.py:538: DeprecationWarning: MCPTool class is deprecated, use `McpTool` instead.
+    mcp_tool = MCPTool(
+
+tests/test_adk_agent_construction.py::test_each_specialist_toolset_exposes_only_its_scoped_tools
+  /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/lib/python3.10/site-packages/google/adk/features/_feature_decorator.py:71: UserWarning: [EXPERIMENTAL] feature BASE_AUTHENTICATED_TOOL is enabled.
+    check_feature_enabled()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 35 passed, 36 warnings in 70.78s (0:01:10) ==================

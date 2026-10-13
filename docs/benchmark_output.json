@@ -1,0 +1,75 @@
+{
+  "multi_agent_supervisor": {
+    "name": "multi_agent_supervisor",
+    "total_tasks": 120,
+    "passed": 120,
+    "pass_rate": 100.0,
+    "by_task_type": {
+      "policy_gated_ticket": {
+        "n": 30,
+        "passed": 30,
+        "pass_rate": 100.0
+      },
+      "recover_asset": {
+        "n": 30,
+        "passed": 30,
+        "pass_rate": 100.0
+      },
+      "revoke_access": {
+        "n": 30,
+        "passed": 30,
+        "pass_rate": 100.0
+      },
+      "status_update": {
+        "n": 30,
+        "passed": 30,
+        "pass_rate": 100.0
+      }
+    },
+    "self_reflection_attempts_total": 30,
+    "wasted_calls_total": 0,
+    "status_breakdown": {
+      "completed": 120
+    },
+    "schema_invalid_attempts": 30,
+    "schema_invalid_approved": 0,
+    "elapsed_seconds": 8.44
+  },
+  "react_baseline": {
+    "name": "react_baseline",
+    "total_tasks": 120,
+    "passed": 60,
+    "pass_rate": 50.0,
+    "by_task_type": {
+      "policy_gated_ticket": {
+        "n": 30,
+        "passed": 0,
+        "pass_rate": 0.0
+      },
+      "recover_asset": {
+        "n": 30,
+        "passed": 30,
+        "pass_rate": 100.0
+      },
+      "revoke_access": {
+        "n": 30,
+        "passed": 30,
+        "pass_rate": 100.0
+      },
+      "status_update": {
+        "n": 30,
+        "passed": 0,
+        "pass_rate": 0.0
+      }
+    },
+    "self_reflection_attempts_total": 16,
+    "wasted_calls_total": 90,
+    "status_breakdown": {
+      "completed": 60,
+      "budget_exceeded": 60
+    },
+    "schema_invalid_attempts": 16,
+    "schema_invalid_approved": 0,
+    "elapsed_seconds": 8.38
+  }
+}

@@ -1,0 +1,31 @@
+=== Multi-agent supervisor vs single-agent ReAct baseline, 120-task offboarding corpus ===
+
+-- multi_agent_supervisor --
+total tasks: 120
+passed (independent oracle): 120/120 (100.0%)
+  policy_gated_ticket: 30/30 (100.0%)
+  recover_asset: 30/30 (100.0%)
+  revoke_access: 30/30 (100.0%)
+  status_update: 30/30 (100.0%)
+status breakdown: {'completed': 120}
+self-reflection attempts triggered: 30
+wasted (wrong-tool) calls: 0
+schema-invalid attempts seen: 30
+schema-invalid actions ever approved: 0
+elapsed: 8.44s
+
+-- react_baseline --
+total tasks: 120
+passed (independent oracle): 60/120 (50.0%)
+  policy_gated_ticket: 0/30 (0.0%)
+  recover_asset: 30/30 (100.0%)
+  revoke_access: 30/30 (100.0%)
+  status_update: 0/30 (0.0%)
+status breakdown: {'completed': 60, 'budget_exceeded': 60}
+self-reflection attempts triggered: 16
+wasted (wrong-tool) calls: 90
+schema-invalid attempts seen: 16
+schema-invalid actions ever approved: 0
+elapsed: 8.38s
+
+task-success gap (multi-agent - baseline): 50.00 percentage points
