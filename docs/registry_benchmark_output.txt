@@ -1,6 +1,6 @@
-=== Declarative skill registry: 5 skills, 200-task corpus ===
+=== Declarative skill registry: 6 skills, 240-task corpus ===
 
-skills declared: 5
+skills declared: 6
 real MCP servers: 2 (src.mcp_servers.legacy_directory_server, src.mcp_servers.policy_doc_server)
 
   revoke_access: 40 tasks, 0 model call(s), 80 tool call(s)
@@ -8,15 +8,16 @@ real MCP servers: 2 (src.mcp_servers.legacy_directory_server, src.mcp_servers.po
   policy_gated_ticket: 40 tasks, 40 model call(s), 120 tool call(s)
   status_update: 40 tasks, 40 model call(s), 80 tool call(s)
   all_level_signoff_routing: 40 tasks, 54 model call(s), 94 tool call(s)
+  badge_vs_asset_routing: 40 tasks, 40 model call(s), 80 tool call(s)
 
-proposed mutations (pending_actions rows, run_id=registry-run): 200
-approved: 200
+proposed mutations (pending_actions rows, run_id=registry-run): 240
+approved: 240
 reached a record unapproved: 0
 
-total model calls across the corpus: 134
-declared judgment steps (counting both conditional branches once each): 4
+total model calls across the corpus: 174
+declared judgment steps (counting both conditional branches once each): 5
 
 action_type breakdown (includes the all_level_signoff_routing branch split):
-  CREATE_TICKET: 94
+  CREATE_TICKET: 134
   REVOKE_ACCESS: 66
   UPDATE_TICKET_STATUS: 40

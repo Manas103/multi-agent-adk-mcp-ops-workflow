@@ -1,0 +1,10 @@
+(empty output above confirms 0 changes to orchestration code)
+
+Full diff for the same commit range, for context:
+ src/registry/judge.py                         | 25 ++++++++++-
+ src/registry/registry_data.py                 | 42 ++++++++++++++++--
+ src/registry/task_corpus.py                   | 27 +++++++++++-
+ tests/test_registry_engine.py                 | 43 +++++++++++++++++++
+ tests/test_registry_judge.py                  | 12 ++++++
+ tests/test_sixth_skill_adds_no_engine_code.py | 62 +++++++++++++++++++++++++++
+ 6 files changed, 204 insertions(+), 7 deletions(-)

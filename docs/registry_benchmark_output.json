@@ -1,5 +1,5 @@
 {
-  "skills_declared": 5,
+  "skills_declared": 6,
   "real_mcp_servers": [
     "src.mcp_servers.legacy_directory_server",
     "src.mcp_servers.policy_doc_server"
@@ -29,16 +29,21 @@
       "n": 40,
       "model_calls": 54,
       "tool_calls": 94
+    },
+    "badge_vs_asset_routing": {
+      "n": 40,
+      "model_calls": 40,
+      "tool_calls": 80
     }
   },
   "pending_action_counts": {
-    "total": 200,
-    "approved": 200,
+    "total": 240,
+    "approved": 240,
     "unapproved": 0
   },
-  "model_calls_total": 134,
+  "model_calls_total": 174,
   "action_type_breakdown": {
-    "CREATE_TICKET": 94,
+    "CREATE_TICKET": 134,
     "REVOKE_ACCESS": 66,
     "UPDATE_TICKET_STATUS": 40
   }

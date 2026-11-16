@@ -17,7 +17,12 @@ import json
 import re
 import subprocess
 
-CLAUDE_CLI_PATH = "claude"
+# "claude.exe", not "claude": this repo runs under WSL2 (see README), and
+# a WSL bash subprocess exec has no Windows PATHEXT resolution, so the
+# bare name (which works fine from native Windows Python, see the
+# sibling grounded-reconciliation-assistant repo) fails with a
+# permission error here instead of finding the real binary.
+CLAUDE_CLI_PATH = "claude.exe"
 
 
 def _decide_pick_policy_doc(task, ctx) -> str | None:

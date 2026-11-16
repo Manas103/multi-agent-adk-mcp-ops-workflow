@@ -1,0 +1,24 @@
+REAL LLM SUBPROCESS CALLS MADE: 21
+
+policy_gated_ticket-000: skill=policy_gated_ticket status=completed model_calls=1 tool_calls=3
+policy_gated_ticket-001: skill=policy_gated_ticket status=completed model_calls=1 tool_calls=3
+policy_gated_ticket-002: skill=policy_gated_ticket status=completed model_calls=1 tool_calls=3
+policy_gated_ticket-003: skill=policy_gated_ticket status=completed model_calls=1 tool_calls=3
+policy_gated_ticket-004: skill=policy_gated_ticket status=completed model_calls=1 tool_calls=3
+status_update-000: skill=status_update status=completed model_calls=1 tool_calls=2
+status_update-001: skill=status_update status=completed model_calls=1 tool_calls=2
+status_update-002: skill=status_update status=completed model_calls=1 tool_calls=2
+status_update-003: skill=status_update status=completed model_calls=1 tool_calls=2
+status_update-004: skill=status_update status=completed model_calls=1 tool_calls=2
+all_level_signoff_routing-000: skill=all_level_signoff_routing status=completed model_calls=1 tool_calls=2
+all_level_signoff_routing-001: skill=all_level_signoff_routing status=completed model_calls=1 tool_calls=2
+all_level_signoff_routing-002: skill=all_level_signoff_routing status=completed model_calls=1 tool_calls=2
+all_level_signoff_routing-003: skill=all_level_signoff_routing status=completed model_calls=2 tool_calls=3
+all_level_signoff_routing-004: skill=all_level_signoff_routing status=completed model_calls=1 tool_calls=2
+badge_vs_asset_routing-000: skill=badge_vs_asset_routing status=completed model_calls=1 tool_calls=2
+badge_vs_asset_routing-001: skill=badge_vs_asset_routing status=completed model_calls=1 tool_calls=2
+badge_vs_asset_routing-002: skill=badge_vs_asset_routing status=completed model_calls=1 tool_calls=2
+badge_vs_asset_routing-003: skill=badge_vs_asset_routing status=completed model_calls=1 tool_calls=2
+badge_vs_asset_routing-004: skill=badge_vs_asset_routing status=completed model_calls=1 tool_calls=2
+
+completed: 20 / 20

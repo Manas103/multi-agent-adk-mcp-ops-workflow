@@ -2,7 +2,7 @@
 The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
 
   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
-.......................................................                  [100%]
+..............................................................           [100%]
 =============================== warnings summary ===============================
 ../../../../../../../../../home/manas/build/madk/.venv/lib/python3.10/site-packages/opentelemetry/util/_importlib_metadata.py:32
   /home/manas/build/madk/.venv/lib/python3.10/site-packages/opentelemetry/util/_importlib_metadata.py:32: DeprecationWarning: SelectableGroups dict interface is deprecated. Use select.
@@ -25,4 +25,4 @@ tests/test_adk_agent_construction.py::test_each_specialist_toolset_exposes_only_
     check_feature_enabled()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-55 passed, 36 warnings in 24.19s
+62 passed, 36 warnings in 28.31s
