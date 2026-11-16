@@ -5,8 +5,10 @@ full 240-task scale) and `ClaudeCLIJudge` (shells out to the real
 `claude` CLI, exercised on a smaller live sample; see
 scripts/run_registry_live_llm_sample.py and the README).
 
-Three decisions, one per judgment step across the five skills currently
-in registry_data.py.
+Four decisions, one per judgment step across the six skills in
+registry_data.py; adding the 6th skill (badge_vs_asset_routing) added
+`decide_badge_or_asset` here but changed nothing else in this file's
+dispatch mechanism.
 """
 from __future__ import annotations
 
@@ -39,10 +41,19 @@ def _decide_signoff_needed(task, ctx) -> str:
     return "all_level" if ctx["employee"].get("access_level") == "ALL" else "standard_or_admin"
 
 
+def _decide_badge_or_asset(task, ctx) -> str:
+    """Whether the targeted outstanding item is a badge (POL-004: handled
+    by security operations, not this workflow) or a real returnable
+    asset that needs an ASSET_RETURN ticket."""
+    target = next(a for a in ctx["assets"]["assets"] if a["asset_id"] == task.asset_id)
+    return "badge_no_ticket" if target["description"] == "badge" else "real_asset_ticket"
+
+
 DECISIONS = {
     "pick_policy_doc": _decide_pick_policy_doc,
     "pick_ticket_to_close": _decide_pick_ticket_to_close,
     "decide_signoff_needed": _decide_signoff_needed,
+    "decide_badge_or_asset": _decide_badge_or_asset,
 }
 
 # What each decision's prompt needs to show the model and what counts as
@@ -66,6 +77,14 @@ _DECISION_PROMPTS = {
         'with exactly one line of JSON: {{"choice": "all_level"}} or '
         '{{"choice": "standard_or_admin"}}.\n'
         "Employee: {payload}"
+    ),
+    "decide_badge_or_asset": (
+        "Given this one targeted asset (description, returned), decide "
+        "whether it is a badge (handled by security operations, no "
+        "ticket needed here) or a real returnable asset that needs an "
+        'ASSET_RETURN ticket. Respond with exactly one line of JSON: '
+        '{{"choice": "badge_no_ticket"}} or {{"choice": "real_asset_ticket"}}.\n'
+        "Asset: {payload}"
     ),
 }
 
@@ -110,6 +129,8 @@ class ClaudeCLIJudge(Judge):
             return ctx["tickets"]["tickets"]
         if decision_name == "decide_signoff_needed":
             return ctx["employee"]
+        if decision_name == "decide_badge_or_asset":
+            return ctx["assets"]["assets"]
         raise KeyError(decision_name)
 
     def decide(self, decision_name: str, task, ctx: dict):

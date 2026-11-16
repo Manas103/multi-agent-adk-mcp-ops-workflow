@@ -86,6 +86,49 @@ async def test_every_proposal_is_schema_valid_and_reaches_approval(seeded_db):
 
 
 @pytest.mark.asyncio
+async def test_badge_vs_asset_routing_files_a_ticket_for_a_real_asset(seeded_db):
+    assets_by_employee = seeded_db["assets_by_employee"]
+    eid, asset_id = 1, None
+    for emp_id, emp_assets in enumerate(assets_by_employee, start=1):
+        real = next((a for a in emp_assets if a["description"] != "badge"), None)
+        if real is not None:
+            eid, asset_id = emp_id, real["asset_id"]
+            break
+    task = Task(task_id="r8", task_type="badge_vs_asset_routing", employee_id=eid, asset_id=asset_id)
+    results = await run_corpus(registry_data.SKILLS_BY_NAME, [task], DeterministicJudge(), "t-badge-real")
+    assert results[0]["model_calls"] == 1
+    gate.auto_approve_all_valid("t-badge-real")
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) AS n FROM offboard.pending_actions WHERE run_id = 't-badge-real' "
+            "AND action_type = 'CREATE_TICKET' AND status = 'APPROVED'"
+        )
+        assert cur.fetchone()["n"] == 1
+
+
+@pytest.mark.asyncio
+async def test_badge_vs_asset_routing_declines_a_badge_with_no_mutation(seeded_db):
+    assets_by_employee = seeded_db["assets_by_employee"]
+    eid, asset_id = None, None
+    for emp_id, emp_assets in enumerate(assets_by_employee, start=1):
+        badge = next((a for a in emp_assets if a["description"] == "badge"), None)
+        if badge is not None:
+            eid, asset_id = emp_id, badge["asset_id"]
+            break
+    if eid is None:
+        pytest.skip("no badge asset in this deterministic seed")
+    task = Task(task_id="r9", task_type="badge_vs_asset_routing", employee_id=eid, asset_id=asset_id)
+    results = await run_corpus(registry_data.SKILLS_BY_NAME, [task], DeterministicJudge(), "t-badge-decline")
+    assert results[0]["model_calls"] == 1
+    assert results[0]["tool_calls"] == 1  # the lookup only; no propose call at all
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) AS n FROM offboard.pending_actions WHERE run_id = 't-badge-decline'"
+        )
+        assert cur.fetchone()["n"] == 0
+
+
+@pytest.mark.asyncio
 async def test_a_step_outside_scoped_tools_is_rejected(seeded_db):
     misdeclared = SkillDecl(
         name="misdeclared",

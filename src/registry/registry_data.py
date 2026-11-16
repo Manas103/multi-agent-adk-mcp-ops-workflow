@@ -4,9 +4,11 @@ conditional, propose); building those four step kinds is the
 "orchestration code" referred to in the README. ALL_LEVEL_SIGNOFF_ROUTING
 is a fifth skill, added when `conditional` branching did not exist yet,
 so it is what the engine's conditional-branch support was actually built
-for. A sixth skill is added by a later commit; see the README,
-"Declarative Skill Registry Extension", for the diff that shows it added
-no new step kind.
+for. BADGE_VS_ASSET_ROUTING is the sixth skill, added in a later commit
+than the first five: it reuses lookup, judgment, conditional and propose
+exactly as already built and adds no new step kind, which is the "0 new
+orchestration code" claim. See the README, "Declarative Skill Registry
+Extension", for the actual `git diff --stat` between the two commits.
 """
 from __future__ import annotations
 
@@ -89,11 +91,43 @@ ALL_LEVEL_SIGNOFF_ROUTING = SkillDecl(
     ),
 )
 
+# Sixth skill: added by declaration only. Every step kind it uses
+# (lookup, judgment, conditional, propose) already exists for the five
+# skills above; nothing in engine.py, models.py or proposal_builders.py
+# changed to add this one (judge.py gained one new decision function,
+# decide_badge_or_asset, the domain-specific judgment criterion itself,
+# which is not orchestration code; see README).
+BADGE_VS_ASSET_ROUTING = SkillDecl(
+    name="badge_vs_asset_routing",
+    description="Route an outstanding item to an ASSET_RETURN ticket, or correctly decline "
+    "to file one when the item is a badge (handled by security operations, POL-004).",
+    scoped_tools=frozenset({"list_assets_for_employee", "propose_return_ticket"}),
+    steps=(
+        {"kind": "lookup", "server": "legacy", "tool": "list_assets_for_employee",
+         "args": {"employee_id": "task.employee_id"}, "store_as": "assets"},
+        {"kind": "judgment", "decision": "decide_badge_or_asset", "store_as": "badge_choice"},
+        {"kind": "conditional", "on": "badge_choice", "branches": {
+            "real_asset_ticket": (
+                {"kind": "propose", "tool": "propose_return_ticket", "args_builder": "return_ticket"},
+            ),
+            "badge_no_ticket": (),
+        }},
+    ),
+)
+
 SKILLS_BY_NAME: dict[str, SkillDecl] = {
     s.name: s for s in (
         REVOKE_ACCESS, RECOVER_ASSET, POLICY_GATED_TICKET, STATUS_UPDATE,
-        ALL_LEVEL_SIGNOFF_ROUTING,
+        ALL_LEVEL_SIGNOFF_ROUTING, BADGE_VS_ASSET_ROUTING,
     )
 }
+
+# The five skills that existed before BADGE_VS_ASSET_ROUTING was added,
+# for the "0 new orchestration code" diff check in
+# tests/test_sixth_skill_adds_no_engine_code.py.
+SKILLS_BEFORE_SIXTH = (
+    "revoke_access", "recover_asset", "policy_gated_ticket", "status_update",
+    "all_level_signoff_routing",
+)
 
 REAL_MCP_SERVERS = ("src.mcp_servers.legacy_directory_server", "src.mcp_servers.policy_doc_server")

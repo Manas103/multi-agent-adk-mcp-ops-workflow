@@ -12,12 +12,29 @@ N_PER_SKILL = 40
 
 SKILL_ORDER = [
     "revoke_access", "recover_asset", "policy_gated_ticket", "status_update",
-    "all_level_signoff_routing",
+    "all_level_signoff_routing", "badge_vs_asset_routing",
 ]
 
 
 def _employee_id_for(skill_index: int, i: int) -> int:
     return ((skill_index * N_PER_SKILL + i) % 60) + 1
+
+
+def _first_employee_with_non_badge_asset(start_eid: int, assets_by_employee: list) -> tuple[int, int]:
+    """Scans forward from start_eid for an employee who owns at least one
+    non-badge asset, so badge_vs_asset_routing's corpus always lands on
+    the real_asset_ticket branch (see README; the badge_no_ticket decline
+    branch is real and covered separately by tests/test_registry_engine.py).
+    Essentially certain to return quickly since only ~1 in 5 assets is a
+    badge; the loop bound just makes "certain" a checked property."""
+    eid = start_eid
+    for _ in range(60):
+        emp_assets = assets_by_employee[eid - 1]
+        asset = next((a for a in emp_assets if a["description"] != "badge"), None)
+        if asset is not None:
+            return eid, asset["asset_id"]
+        eid = (eid % 60) + 1
+    raise RuntimeError("no employee in the seeded pool owns a non-badge asset")
 
 
 def build_tasks(seed_scenario: dict) -> list[Task]:
@@ -60,6 +77,14 @@ def build_tasks(seed_scenario: dict) -> list[Task]:
         tasks.append(Task(
             task_id=f"all_level_signoff_routing-{i:03d}",
             task_type="all_level_signoff_routing", employee_id=eid,
+        ))
+
+    for i in range(N_PER_SKILL):
+        start_eid = _employee_id_for(5, i)
+        eid, asset_id = _first_employee_with_non_badge_asset(start_eid, assets_by_employee)
+        tasks.append(Task(
+            task_id=f"badge_vs_asset_routing-{i:03d}",
+            task_type="badge_vs_asset_routing", employee_id=eid, asset_id=asset_id,
         ))
 
     return tasks

@@ -71,3 +71,15 @@ def test_claude_cli_judge_coerces_ticket_choice_to_int():
     with patch.object(ClaudeCLIJudge, "_call_claude", return_value='{"choice": "7"}'):
         value = ClaudeCLIJudge().decide("pick_ticket_to_close", _FakeTask(), ctx)
     assert value == 7
+
+
+def test_decide_badge_or_asset_declines_a_badge():
+    ctx = {"assets": {"assets": [{"asset_id": 1, "description": "badge", "returned": False}]}}
+    task = _FakeTask(asset_id=1)
+    assert DeterministicJudge().decide("decide_badge_or_asset", task, ctx) == "badge_no_ticket"
+
+
+def test_decide_badge_or_asset_routes_a_real_asset():
+    ctx = {"assets": {"assets": [{"asset_id": 2, "description": "laptop", "returned": False}]}}
+    task = _FakeTask(asset_id=2)
+    assert DeterministicJudge().decide("decide_badge_or_asset", task, ctx) == "real_asset_ticket"
