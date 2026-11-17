@@ -12,7 +12,7 @@ self-reflection attempts triggered: 30
 wasted (wrong-tool) calls: 0
 schema-invalid attempts seen: 30
 schema-invalid actions ever approved: 0
-elapsed: 8.44s
+elapsed: 9.29s
 
 -- react_baseline --
 total tasks: 120
@@ -26,6 +26,6 @@ self-reflection attempts triggered: 16
 wasted (wrong-tool) calls: 90
 schema-invalid attempts seen: 16
 schema-invalid actions ever approved: 0
-elapsed: 8.38s
+elapsed: 8.86s
 
 task-success gap (multi-agent - baseline): 50.00 percentage points

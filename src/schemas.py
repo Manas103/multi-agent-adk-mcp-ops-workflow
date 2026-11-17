@@ -84,10 +84,33 @@ class UpdateTicketStatusAction(BaseModel):
     reason: str = Field(min_length=8)
 
 
+class RestoreAccessAction(ProposedAction):
+    """The inverse of RevokeAccessAction: used only by the compensating
+    rollback path in src/workflows/compensator.py when a transport fault
+    interrupts the compound offboarding saga after access was already
+    revoked. Always restores to not-revoked; there is no access_level here
+    because restoring is not re-granting a specific level, it is undoing
+    this saga's own revocation."""
+
+    action_type: Literal["RESTORE_ACCESS"] = "RESTORE_ACCESS"
+
+
+class CancelTicketAction(BaseModel):
+    """The inverse of CreateTicketAction: cancels (deletes) a ticket this
+    saga itself created. Used only by the compensating rollback path."""
+
+    action_type: Literal["CANCEL_TICKET"] = "CANCEL_TICKET"
+    ticket_id: int
+    proposed_by: str
+    reason: str = Field(min_length=8)
+
+
 ACTION_TYPES = {
     "REVOKE_ACCESS": RevokeAccessAction,
     "CREATE_TICKET": CreateTicketAction,
     "UPDATE_TICKET_STATUS": UpdateTicketStatusAction,
+    "RESTORE_ACCESS": RestoreAccessAction,
+    "CANCEL_TICKET": CancelTicketAction,
 }
 
 

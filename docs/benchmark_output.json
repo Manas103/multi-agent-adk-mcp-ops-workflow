@@ -33,7 +33,7 @@
     },
     "schema_invalid_attempts": 30,
     "schema_invalid_approved": 0,
-    "elapsed_seconds": 8.44
+    "elapsed_seconds": 9.29
   },
   "react_baseline": {
     "name": "react_baseline",
@@ -70,6 +70,6 @@
     },
     "schema_invalid_attempts": 16,
     "schema_invalid_approved": 0,
-    "elapsed_seconds": 8.38
+    "elapsed_seconds": 8.86
   }
 }

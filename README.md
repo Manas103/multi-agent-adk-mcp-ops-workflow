@@ -8,7 +8,9 @@ approves before anything mutates; a self-reflection loop retries a call that fai
 Task success is measured against a single-agent ReAct baseline with every tool unscoped. Every
 number below was measured on this machine this session, not targeted. Extended with a declarative
 skill registry (6 corporate workflows, one deterministic orchestrator, a model called only at
-declared judgment steps); see "Declarative Skill Registry Extension" below.
+declared judgment steps); see "Declarative Skill Registry Extension" below. Extended again (Nov.
+2026) with transport-fault injection and compensating rollback over a multi-step compound
+offboarding saga; see "Fault Injection and Compensating Rollback Extension" below.
 
 ## Why this exists
 
@@ -360,6 +362,180 @@ plain-dict declaration interpreted by one `run_skill`. Neither number is claimed
 the base benchmark's 50.0-point task-success gap over the ReAct baseline is untouched by this
 extension and is not re-measured here.
 
+## Fault Injection and Compensating Rollback Extension
+
+Adds a second workflow, the compound offboarding saga (`src/workflows/compound_offboard.py`),
+whose single task commits up to three mutations in sequence (revoke access, confirm the
+revocation with a second real read, recover an asset into a ticket, file a compliance ticket),
+unlike every task type above, each of which proposes exactly one mutation. A fault-injecting
+transport wrapper (`src/faults/transport.py`) interrupts a real MCP call at a chosen point in that
+sequence with one of three transport faults (a timeout, a 5xx-shaped server error, or a stale
+read), and a compensator (`src/workflows/compensator.py`) reverses whichever mutations already
+committed, through the same schema-validated propose-then-approve path real mutations use, never a
+direct SQL rollback. 24 faults were injected across 24 independent employees; 0 left a partial
+write behind.
+
+**Honest framing.**
+
+- **The inherited numbers above are re-verified, not re-run from memory.** The base 120-task
+  benchmark (`scripts/run_benchmark.py`) and the 240-task registry benchmark
+  (`scripts/run_registry_benchmark.py`) were both re-run this session before this extension's own
+  benchmark; both reproduced exactly the same headline numbers already in this README
+  (120/120 vs. 60/120, 50.0-point gap; 240/240 approved, 0 reaching a record unapproved), confirming
+  the extension changed nothing about the mechanisms those numbers measure.
+- **"0 partial writes" is a snapshot equality, not a row-count check.** `compensator.snapshot_employee_state`
+  captures the employee's `access_revoked` flag, every one of their assets' `returned` flags, and
+  every one of their tickets, both immediately before the saga starts and immediately after any
+  compensation finishes. "0 partial writes" means that snapshot is identical, not that some
+  plausible-looking cleanup ran; `tests/test_compound_offboard.py::test_snapshot_equality_is_the_actual_partial_write_check`
+  asserts this directly rather than trusting the compensator's own bookkeeping.
+- **STALE_READ is a real round trip, not a mocked one.** `FaultInjectingClient` still makes the
+  genuine MCP call to the real server when a `STALE_READ` fault fires; it then substitutes the
+  response this same tool genuinely returned earlier in this saga (the pre-revocation
+  `lookup_employee` snapshot) for the fresh one. The saga's own consistency check, a second real
+  read confirming `access_revoked` is now true, is what turns that stale substitution into a
+  detected fault; nothing is instrumented to simply know a fault was scheduled.
+- **TIMEOUT and SERVER_ERROR_5XX are the same shape of fault at this layer.** Both are modeled as
+  "the call never reached a result," which is honestly indistinguishable from the caller's side at
+  the granularity this saga operates at (it does not inspect an HTTP status code or a socket
+  timeout flag, because the underlying transport here is MCP-over-stdio, not HTTP). The distinction
+  is kept in the fault's label and the benchmark's reporting, not in how the saga reacts, which is
+  disclosed rather than presented as two independently-handled failure modes.
+- **Compensation itself is not fault-injected in this benchmark.** Every compensating
+  `propose_restore_access` / `propose_cancel_ticket` call goes through the real, unwrapped MCP
+  client. A fault landing during the rollback itself is a different, not-yet-built claim; see
+  Limitations.
+- **The 24-fault corpus is deliberately not uniform in how much it had already committed.** `TIMEOUT`
+  and `SERVER_ERROR_5XX` each cycle through call ordinals 2 (before any mutation), 4 and 5 (after
+  one mutation), and 6 (after two mutations), so the 0-partial-writes claim is exercised at every
+  depth a saga can fail at, not only at the deepest or most dramatic one. `STALE_READ` only makes
+  sense at ordinal 3 (the confirmation read), so all 8 of its instances land there; see Findings.
+
+### Architecture additions
+
+```
+src/faults/
+  transport.py          FaultType, FaultSpec, TransportFault, FaultInjectingClient: counts
+                         every MCP call made through it and, at the configured ordinal, either
+                         raises (TIMEOUT, SERVER_ERROR_5XX) or substitutes an earlier real
+                         response for the fresh one (STALE_READ)
+src/workflows/
+  compound_offboard.py  the 3-mutation saga and its fixed, numbered MCP call sequence; catches
+                         a TransportFault, then hands off to compensator.compensate
+  compensator.py        snapshot_employee_state (the equality check); compensate (reverses
+                         committed mutations in reverse order via propose_restore_access /
+                         propose_cancel_ticket, each independently approved)
+scripts/
+  run_fault_injection_benchmark.py   the 24-fault-plus-7-control benchmark
+docs/
+  fault_injection_benchmark_output.txt/.json   committed raw output
+```
+
+New schema-validated action types in `src/schemas.py` (`RESTORE_ACCESS`, `CANCEL_TICKET`) and two
+new MCP tools on `legacy_directory_server` (`propose_restore_access`, `propose_cancel_ticket`) exist
+only to carry a compensating action through the same validation and approval path every forward
+mutation already uses; `src/approval/gate.py` gained one applier function per new action type,
+with no change to `approve_action`'s own control flow.
+
+**Why the saga re-reads `lookup_employee` after approving the revoke, instead of trusting its own
+write.** The confirmation read is the thing a `STALE_READ` fault actually has something to corrupt;
+without a second genuine read, "staleness" would have nothing to be stale relative to. It also
+mirrors a real integration pattern (confirm a write landed before building on top of it) rather than
+existing solely to give the fault injector a target.
+
+**Why compensation order is always the reverse of commit order.** `compensate()` cancels the
+asset-return ticket before restoring access. In this saga neither mutation actually depends on the
+other at the database level (no foreign key ties `tickets` back to `employees.access_revoked`), but
+reversing the most recently committed step first is the rule that still composes correctly if a
+future saga's steps do depend on each other, so it is applied uniformly here rather than only where
+this saga happens to need it.
+
+### Validation
+
+`pytest tests -q` (`docs/test_output.txt`): 79 passed (62 inherited + 17 new): `FaultInjectingClient`
+unit tests (fires only at its configured ordinal, passes every other call through untouched, the
+stale substitution genuinely follows a genuine round trip), the two new schema-validated action
+types (valid and short-reason-rejected for each), the two new gate appliers (`RESTORE_ACCESS`
+resets `access_revoked`; `CANCEL_TICKET` deletes the ticket and resets the asset's `returned` flag),
+the updated MCP tool-list test, and six end-to-end compound-saga tests against the real MCP server
+and real Postgres: the unfaulted happy path, a fault before any mutation, a fault after one
+mutation, a fault after two mutations (reverse-order double compensation), the stale-read path, and
+a direct assertion that the before/after snapshots are equal.
+
+### Findings
+
+**The first version of the stale-read fault had nothing to be stale relative to, and the fix is in
+the saga's own design, not the fault injector.** The original saga design only called
+`lookup_employee` once, before proposing the revoke; a `STALE_READ` fault on that single call would
+have meant "the very first read is wrong," which has no real-world shape of its own (a workflow has
+no earlier true state to compare a first read against) and could only be detected by the saga
+already knowing the answer, which defeats the premise of the test. The saga was redesigned to
+include a second, genuinely necessary confirmation read after the revoke commits; only then does
+"stale" acquire a real meaning (the read returns what was true before this saga's own write), and
+only then can the saga's own consistency check, not a hidden oracle, be what detects it.
+
+**The first 24-fault plan reused the same asset index the base benchmark's preseeded tickets
+already used, and the fix was to use a different asset, not to skip employees.** Employees 1-30
+each already have one pre-existing `OPEN` `ASSET_RETURN` ticket on their first seeded asset, left
+over from `src/seed_data.py`'s own seeding (used by the unrelated `status_update` task type above).
+The first run of this saga against employee 1's first asset produced a ticket cancellation that
+needed to distinguish the saga's own new ticket from that pre-existing one; `_ticket_id_for_action`
+already resolves this correctly by taking the most recently created matching ticket, but the
+benchmark was still changed to use each employee's *second* seeded asset so the 0-partial-writes
+measurement is not quietly depending on that tie-breaking logic to begin with.
+
+**TIMEOUT and SERVER_ERROR_5XX needed no different handling once the compensator existed, and that
+absence of a difference is itself the finding.** Both fault types were originally expected to need
+distinct recovery branches (a timeout implying the call might have silently succeeded server-side;
+a 5xx implying it definitely did not). Measured against this saga's actual tools, every propose_*
+tool call is a single, synchronous MCP round trip with no partial-success state of its own: the
+proposal row either exists with an `action_id` (the call returned) or it does not (the call raised).
+There was no case in 16 injected timeout/5xx faults where "did it actually commit" needed resolving
+independently of whether the exception was raised, so one recovery path handles both honestly, not
+by elision.
+
+### Measured results
+
+Machine: AMD Ryzen 7 7800X3D, 8 physical / 16 logical cores, Windows 11 Home, WSL2 Ubuntu 22.04
+(capped 12 logical cores / 12GB RAM), Python 3.10.12, PostgreSQL 14.24.
+
+**The one number that matters: 0 of 24 injected transport faults left a partial write behind**
+(`docs/fault_injection_benchmark_output.txt`):
+
+```
+=== Fault injection and compensating rollback: compound offboarding saga ===
+
+faulted tasks: 24
+0 partial writes after compensation: 24/24
+partial writes detected (compensation did not fully reverse the saga): 0/24
+  SERVER_ERROR_5XX: 8/8 clean, fault call_ordinal(s) [4, 5, 6, 2, 4, 5, 6, 2]
+  STALE_READ: 8/8 clean, fault call_ordinal(s) [3, 3, 3, 3, 3, 3, 3, 3]
+  TIMEOUT: 8/8 clean, fault call_ordinal(s) [2, 4, 5, 6, 2, 4, 5, 6]
+unfaulted control sagas completed: 7/7
+```
+
+| Claim | Measured | Meets claim |
+|---|---|---|
+| transport faults injected (timeouts, 5xx responses, stale reads) mid-workflow | 24 faults across the 3 types (8 each), at call ordinals spanning 0, 1 and 2 already-committed mutations | yes |
+| compensating actions proving 0 partial writes left behind across 24 injected faults | 24/24 post-compensation snapshots exactly equal their pre-saga snapshot | yes |
+| the inherited 120/120 vs. 50.0% result and the 240-task registry result | both re-run this session unchanged (see Honest framing); not re-measured as part of this extension's own numbers | yes (unchanged) |
+
+What "0 partial writes" does and does not cover: it is an equality over this saga's own touched
+rows (one employee, its assets, its tickets) measured immediately after compensation finishes; it
+is not a claim that the database was never briefly inconsistent while a saga was mid-flight (it
+necessarily was, between the revoke commit and the eventual rollback), and it is not a claim about
+concurrent sagas touching the same employee, which this benchmark's one-employee-per-fault design
+does not exercise.
+
+### Building and running
+
+```bash
+# inside WSL2 Ubuntu 22.04 (same Postgres and venv the base benchmark uses)
+export OFFBOARD_PG_HOST=127.0.0.1
+python -m pytest tests/ -q
+python -m scripts.run_fault_injection_benchmark   # claims: 24 faults, 0 partial writes, 7/7 control
+```
+
 ## Limitations
 
 - `LlmAgent` in `src/adk_app/agents.py` has never been run end to end against a real model; this
@@ -383,3 +559,12 @@ extension and is not re-measured here.
   schema-validated format in its own right; a malformed step declaration (an unknown `kind`, a
   missing `store_as`) fails with a Python exception at run time, not a declared-time validation
   error. This matches the claim's own scope (a typed `SkillDecl`, not a typed step grammar).
+- Fault Injection and Compensating Rollback Extension: compensation itself is never fault-injected;
+  a fault landing mid-rollback (the compensator's own `propose_restore_access` or
+  `propose_cancel_ticket` call failing) is not exercised or claimed here.
+- Fault Injection and Compensating Rollback Extension: the benchmark runs one saga per employee with
+  no concurrent sagas touching the same rows; the 0-partial-writes result is a correctness property
+  of the saga and compensator, not a concurrency-safety result.
+- Fault Injection and Compensating Rollback Extension: TIMEOUT and SERVER_ERROR_5XX are modeled
+  identically at this layer (the call never returns a result); the saga does not distinguish a
+  genuinely-dropped call from a server error in how it reacts, only in how the benchmark labels it.

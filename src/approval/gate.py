@@ -82,10 +82,35 @@ def _apply_update_ticket_status(payload: dict) -> None:
             )
 
 
+def _apply_restore_access(payload: dict) -> None:
+    with db.cursor() as cur:
+        cur.execute(
+            "UPDATE offboard.employees SET access_revoked = FALSE WHERE employee_id = %s",
+            (payload["employee_id"],),
+        )
+
+
+def _apply_cancel_ticket(payload: dict) -> None:
+    """Deletes the ticket this saga itself created and, if the ticket named
+    an asset, resets that asset's returned flag to FALSE, restoring exactly
+    the pre-ticket state rather than leaving a CANCELLED row behind."""
+    with db.cursor() as cur:
+        cur.execute("SELECT asset_id FROM offboard.tickets WHERE ticket_id = %s", (payload["ticket_id"],))
+        row = cur.fetchone()
+        cur.execute("DELETE FROM offboard.tickets WHERE ticket_id = %s", (payload["ticket_id"],))
+        if row is not None and row["asset_id"] is not None:
+            cur.execute(
+                "UPDATE offboard.assets SET returned = FALSE WHERE asset_id = %s",
+                (row["asset_id"],),
+            )
+
+
 _APPLIERS = {
     "REVOKE_ACCESS": _apply_revoke_access,
     "CREATE_TICKET": _apply_create_ticket,
     "UPDATE_TICKET_STATUS": _apply_update_ticket_status,
+    "RESTORE_ACCESS": _apply_restore_access,
+    "CANCEL_TICKET": _apply_cancel_ticket,
 }
 
 

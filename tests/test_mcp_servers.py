@@ -15,7 +15,7 @@ async def test_legacy_directory_server_lists_its_tools(seeded_db):
     assert set(names) == {
         "lookup_employee", "list_assets_for_employee", "list_tickets_for_employee",
         "propose_revoke_access", "propose_return_ticket", "propose_policy_ticket",
-        "update_ticket_status",
+        "update_ticket_status", "propose_restore_access", "propose_cancel_ticket",
     }
 
 

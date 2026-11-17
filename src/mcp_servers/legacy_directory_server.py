@@ -1,11 +1,14 @@
-"""MCP server #1: the legacy HR/ITSM database. Five tools, three of them
+"""MCP server #1: the legacy HR/ITSM database. Eight tools, five of them
 state-changing (propose_revoke_access, propose_return_ticket,
-update_ticket_status), each of which schema-validates its arguments with
-src.schemas.build_action before it is allowed anywhere near
-offboard.pending_actions. A tool never writes to employees, assets or
-tickets directly; that only happens in src/approval/gate.py once a human
-(simulated by scripts/run_benchmark.py for measurement; see README) approves
-the proposal.
+update_ticket_status, propose_restore_access, propose_cancel_ticket), each of
+which schema-validates its arguments with src.schemas.build_action before it
+is allowed anywhere near offboard.pending_actions. A tool never writes to
+employees, assets or tickets directly; that only happens in
+src/approval/gate.py once a human (simulated by scripts/run_benchmark.py for
+measurement; see README) approves the proposal. propose_restore_access and
+propose_cancel_ticket are the two compensating (undo) proposals used only by
+the fault-injection extension's rollback path; see
+src/workflows/compensator.py.
 
 Run standalone: python -m src.mcp_servers.legacy_directory_server
 """
@@ -134,6 +137,29 @@ def update_ticket_status(task_id: str, run_id: str, ticket_id: int, new_status: 
     return _queue_proposal(task_id, run_id, "UPDATE_TICKET_STATUS", {
         "ticket_id": ticket_id, "new_status": new_status,
         "reason": reason, "proposed_by": proposed_by,
+    })
+
+
+@server.tool()
+def propose_restore_access(task_id: str, run_id: str, employee_id: int, reason: str,
+                            proposed_by: str) -> dict:
+    """Propose restoring an employee's access, the inverse of
+    propose_revoke_access. Used by the compensating-rollback workflow
+    (src/workflows/compensator.py) when a transport fault interrupts the
+    compound offboarding saga after access was already revoked."""
+    return _queue_proposal(task_id, run_id, "RESTORE_ACCESS", {
+        "employee_id": employee_id, "reason": reason, "proposed_by": proposed_by,
+    })
+
+
+@server.tool()
+def propose_cancel_ticket(task_id: str, run_id: str, ticket_id: int, reason: str,
+                           proposed_by: str) -> dict:
+    """Propose cancelling (deleting) a ticket this saga itself created, the
+    inverse of propose_return_ticket / propose_policy_ticket. Used by the
+    compensating-rollback workflow."""
+    return _queue_proposal(task_id, run_id, "CANCEL_TICKET", {
+        "ticket_id": ticket_id, "reason": reason, "proposed_by": proposed_by,
     })
 
 

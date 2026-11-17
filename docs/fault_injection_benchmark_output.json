@@ -1,0 +1,543 @@
+{
+  "faulted_total": 24,
+  "zero_partial_writes": 24,
+  "partial_writes_detected": 0,
+  "by_fault_type": {
+    "STALE_READ": {
+      "n": 8,
+      "clean": 8,
+      "ordinals": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "TIMEOUT": {
+      "n": 8,
+      "clean": 8,
+      "ordinals": [
+        2,
+        4,
+        5,
+        6,
+        2,
+        4,
+        5,
+        6
+      ]
+    },
+    "SERVER_ERROR_5XX": {
+      "n": 8,
+      "clean": 8,
+      "ordinals": [
+        4,
+        5,
+        6,
+        2,
+        4,
+        5,
+        6,
+        2
+      ]
+    }
+  },
+  "control_unfaulted_completed": "7/7",
+  "detail": [
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 1,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 2,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 3,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 4,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 5,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 6,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 7,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "STALE_READ",
+      "employee_id": 8,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "STALE_READ",
+        "call_ordinal": 3,
+        "tool_name": "lookup_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 9,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 2,
+        "tool_name": "propose_revoke_access"
+      },
+      "completed_mutations": [],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 10,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 4,
+        "tool_name": "list_assets_for_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 11,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 5,
+        "tool_name": "propose_return_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 12,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 6,
+        "tool_name": "propose_policy_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN"
+      ],
+      "compensated_mutations": [
+        "CANCEL_TICKET:ASSET_RETURN",
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 13,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 2,
+        "tool_name": "propose_revoke_access"
+      },
+      "completed_mutations": [],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 14,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 4,
+        "tool_name": "list_assets_for_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 15,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 5,
+        "tool_name": "propose_return_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "TIMEOUT",
+      "employee_id": 16,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "TIMEOUT",
+        "call_ordinal": 6,
+        "tool_name": "propose_policy_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN"
+      ],
+      "compensated_mutations": [
+        "CANCEL_TICKET:ASSET_RETURN",
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 17,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 4,
+        "tool_name": "list_assets_for_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 18,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 5,
+        "tool_name": "propose_return_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 19,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 6,
+        "tool_name": "propose_policy_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN"
+      ],
+      "compensated_mutations": [
+        "CANCEL_TICKET:ASSET_RETURN",
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 20,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 2,
+        "tool_name": "propose_revoke_access"
+      },
+      "completed_mutations": [],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 21,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 4,
+        "tool_name": "list_assets_for_employee"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 22,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 5,
+        "tool_name": "propose_return_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS"
+      ],
+      "compensated_mutations": [
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 23,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 6,
+        "tool_name": "propose_policy_ticket"
+      },
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN"
+      ],
+      "compensated_mutations": [
+        "CANCEL_TICKET:ASSET_RETURN",
+        "RESTORE_ACCESS"
+      ],
+      "partial_write": false
+    },
+    {
+      "fault_type": "SERVER_ERROR_5XX",
+      "employee_id": 24,
+      "status": "failed_compensated",
+      "fault": {
+        "fault_type": "SERVER_ERROR_5XX",
+        "call_ordinal": 2,
+        "tool_name": "propose_revoke_access"
+      },
+      "completed_mutations": [],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 25,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 26,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 27,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 28,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 29,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 30,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    },
+    {
+      "fault_type": "CONTROL_NO_FAULT",
+      "employee_id": 31,
+      "status": "completed",
+      "fault": null,
+      "completed_mutations": [
+        "REVOKE_ACCESS",
+        "CREATE_TICKET:ASSET_RETURN",
+        "CREATE_TICKET:POLICY_COMPLIANCE"
+      ],
+      "compensated_mutations": [],
+      "partial_write": false
+    }
+  ]
+}

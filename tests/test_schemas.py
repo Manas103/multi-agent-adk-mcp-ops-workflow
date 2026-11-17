@@ -50,6 +50,36 @@ def test_update_ticket_status_invalid_enum_rejected():
         pass
 
 
+def test_restore_access_valid():
+    action = build_action("RESTORE_ACCESS", {
+        "employee_id": 1, "reason": "compensating rollback after a transport fault", "proposed_by": "compensator",
+    })
+    assert action.action_type == "RESTORE_ACCESS"
+
+
+def test_restore_access_short_reason_rejected():
+    try:
+        build_action("RESTORE_ACCESS", {"employee_id": 1, "reason": "no", "proposed_by": "compensator"})
+        assert False, "expected SchemaValidationError"
+    except SchemaValidationError:
+        pass
+
+
+def test_cancel_ticket_valid():
+    action = build_action("CANCEL_TICKET", {
+        "ticket_id": 5, "reason": "compensating rollback after a transport fault", "proposed_by": "compensator",
+    })
+    assert action.ticket_id == 5
+
+
+def test_cancel_ticket_short_reason_rejected():
+    try:
+        build_action("CANCEL_TICKET", {"ticket_id": 5, "reason": "no", "proposed_by": "compensator"})
+        assert False, "expected SchemaValidationError"
+    except SchemaValidationError:
+        pass
+
+
 def test_unknown_action_type_rejected():
     try:
         build_action("DELETE_EVERYTHING", {})
