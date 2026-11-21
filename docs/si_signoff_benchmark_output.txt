@@ -1,0 +1,13 @@
+=== SI signoff flow: 128-task corpus, one model-free deterministic routing comparison ===
+
+gated Taskmaster flow:  128 of 128 signoffs finished correctly
+free-form tool calling: 119 of 128 signoffs finished correctly
+
+by family (has_package x standard):
+  board_only_NRZ: gated 32/32, free-form 32/32
+  board_only_PAM4: gated 32/32, free-form 29/32
+  pkg_board_NRZ: gated 32/32, free-form 32/32
+  pkg_board_PAM4: gated 32/32, free-form 26/32
+
+free-form wrong cascade-variant picks: 48 of 128
+free-form wrong simulate-variant picks: 30 of 128

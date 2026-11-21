@@ -2,95 +2,8 @@
 The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
 
   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
-============================= test session starts ==============================
-platform linux -- Python 3.10.12, pytest-9.2.0, pluggy-1.7.0 -- /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/bin/python
-cachedir: .pytest_cache
-rootdir: /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow
-configfile: pytest.ini
-plugins: anyio-4.16.0, asyncio-1.5.0
-asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collecting ... collected 79 items
-
-tests/test_adk_agent_construction.py::test_supervisor_has_four_sub_agents PASSED [  1%]
-tests/test_adk_agent_construction.py::test_each_specialist_toolset_exposes_only_its_scoped_tools PASSED [  2%]
-tests/test_adk_agent_construction.py::test_baseline_agent_exposes_every_tool_from_both_servers PASSED [  3%]
-tests/test_approval_api.py::test_health PASSED                           [  5%]
-tests/test_approval_api.py::test_pending_and_approve_flow PASSED         [  6%]
-tests/test_approval_gate.py::test_approving_a_valid_action_mutates_state PASSED [  7%]
-tests/test_approval_gate.py::test_schema_invalid_action_is_never_approved PASSED [  8%]
-tests/test_approval_gate.py::test_approving_twice_raises PASSED          [ 10%]
-tests/test_approval_gate.py::test_approving_restore_access_resets_access_revoked PASSED [ 11%]
-tests/test_approval_gate.py::test_approving_cancel_ticket_deletes_ticket_and_resets_asset PASSED [ 12%]
-tests/test_approval_gate.py::test_auto_approve_all_valid_skips_schema_invalid PASSED [ 13%]
-tests/test_compound_offboard.py::test_unfaulted_saga_completes_all_three_mutations PASSED [ 15%]
-tests/test_compound_offboard.py::test_timeout_before_any_mutation_needs_no_compensation PASSED [ 16%]
-tests/test_compound_offboard.py::test_timeout_after_revoke_compensates_with_restore PASSED [ 17%]
-tests/test_compound_offboard.py::test_server_error_after_both_mutations_compensates_both_in_reverse_order PASSED [ 18%]
-tests/test_compound_offboard.py::test_stale_read_detected_and_compensated PASSED [ 20%]
-tests/test_compound_offboard.py::test_snapshot_equality_is_the_actual_partial_write_check PASSED [ 21%]
-tests/test_fault_transport.py::test_no_fault_passes_every_call_through PASSED [ 22%]
-tests/test_fault_transport.py::test_timeout_fires_only_at_its_ordinal PASSED [ 24%]
-tests/test_fault_transport.py::test_server_error_5xx_fires_only_at_its_ordinal PASSED [ 25%]
-tests/test_fault_transport.py::test_stale_read_makes_the_real_call_then_returns_an_earlier_response PASSED [ 26%]
-tests/test_fault_transport.py::test_stale_read_with_no_prior_response_raises PASSED [ 27%]
-tests/test_mcp_servers.py::test_legacy_directory_server_lists_its_tools PASSED [ 29%]
-tests/test_mcp_servers.py::test_policy_doc_server_lists_its_tools PASSED [ 30%]
-tests/test_mcp_servers.py::test_lookup_employee_real_row PASSED          [ 31%]
-tests/test_mcp_servers.py::test_lookup_employee_missing_row PASSED       [ 32%]
-tests/test_mcp_servers.py::test_propose_revoke_access_valid_queues_a_schema_valid_action PASSED [ 34%]
-tests/test_mcp_servers.py::test_propose_revoke_access_short_reason_is_schema_invalid PASSED [ 35%]
-tests/test_mcp_servers.py::test_search_policies_ranks_by_overlap PASSED  [ 36%]
-tests/test_mcp_servers.py::test_get_policy_found_and_not_found PASSED    [ 37%]
-tests/test_oracle.py::test_revoke_access_fails_until_actually_revoked PASSED [ 39%]
-tests/test_oracle.py::test_recover_asset_requires_matching_ticket PASSED [ 40%]
-tests/test_oracle.py::test_policy_gated_ticket_must_cite_the_correct_doc PASSED [ 41%]
-tests/test_oracle_independence.py::test_oracle_does_not_import_orchestrators_or_servers PASSED [ 43%]
-tests/test_orchestrator.py::test_supervisor_self_reflection_recovers_from_malformed_first_attempt PASSED [ 44%]
-tests/test_orchestrator.py::test_baseline_exceeds_budget_on_status_update PASSED [ 45%]
-tests/test_orchestrator.py::test_supervisor_status_update_succeeds_on_the_same_task PASSED [ 46%]
-tests/test_registry_engine.py::test_revoke_access_skill_makes_no_model_call PASSED [ 48%]
-tests/test_registry_engine.py::test_recover_asset_skill_makes_no_model_call PASSED [ 49%]
-tests/test_registry_engine.py::test_policy_gated_ticket_skill_calls_the_model_exactly_once PASSED [ 50%]
-tests/test_registry_engine.py::test_status_update_skill_calls_the_model_exactly_once PASSED [ 51%]
-tests/test_registry_engine.py::test_all_level_signoff_routing_calls_model_once_for_non_all_level PASSED [ 53%]
-tests/test_registry_engine.py::test_all_level_signoff_routing_calls_model_twice_for_all_level PASSED [ 54%]
-tests/test_registry_engine.py::test_every_proposal_is_schema_valid_and_reaches_approval PASSED [ 55%]
-tests/test_registry_engine.py::test_badge_vs_asset_routing_files_a_ticket_for_a_real_asset PASSED [ 56%]
-tests/test_registry_engine.py::test_badge_vs_asset_routing_declines_a_badge_with_no_mutation PASSED [ 58%]
-tests/test_registry_engine.py::test_a_step_outside_scoped_tools_is_rejected PASSED [ 59%]
-tests/test_registry_judge.py::test_pick_policy_doc_takes_the_top_ranked_result PASSED [ 60%]
-tests/test_registry_judge.py::test_pick_policy_doc_returns_none_when_no_results PASSED [ 62%]
-tests/test_registry_judge.py::test_pick_ticket_to_close_picks_the_open_one PASSED [ 63%]
-tests/test_registry_judge.py::test_pick_ticket_to_close_picks_lowest_id_when_more_than_one_open PASSED [ 64%]
-tests/test_registry_judge.py::test_decide_signoff_needed_all_level PASSED [ 65%]
-tests/test_registry_judge.py::test_decide_signoff_needed_standard PASSED [ 67%]
-tests/test_registry_judge.py::test_claude_cli_judge_parses_a_valid_choice PASSED [ 68%]
-tests/test_registry_judge.py::test_claude_cli_judge_raises_on_unparseable_output PASSED [ 69%]
-tests/test_registry_judge.py::test_claude_cli_judge_coerces_ticket_choice_to_int PASSED [ 70%]
-tests/test_registry_judge.py::test_decide_badge_or_asset_declines_a_badge PASSED [ 72%]
-tests/test_registry_judge.py::test_decide_badge_or_asset_routes_a_real_asset PASSED [ 73%]
-tests/test_registry_task_corpus.py::test_corpus_has_N_PER_SKILL_tasks_per_declared_skill PASSED [ 74%]
-tests/test_registry_task_corpus.py::test_every_task_type_in_the_corpus_is_a_declared_skill PASSED [ 75%]
-tests/test_registry_task_corpus.py::test_status_update_tasks_each_get_a_distinct_fresh_open_ticket PASSED [ 77%]
-tests/test_schemas.py::test_revoke_access_valid PASSED                   [ 78%]
-tests/test_schemas.py::test_revoke_access_short_reason_rejected PASSED   [ 79%]
-tests/test_schemas.py::test_create_ticket_asset_return_requires_asset_id PASSED [ 81%]
-tests/test_schemas.py::test_create_ticket_policy_compliance_requires_doc_id PASSED [ 82%]
-tests/test_schemas.py::test_update_ticket_status_invalid_enum_rejected PASSED [ 83%]
-tests/test_schemas.py::test_restore_access_valid PASSED                  [ 84%]
-tests/test_schemas.py::test_restore_access_short_reason_rejected PASSED  [ 86%]
-tests/test_schemas.py::test_cancel_ticket_valid PASSED                   [ 87%]
-tests/test_schemas.py::test_cancel_ticket_short_reason_rejected PASSED   [ 88%]
-tests/test_schemas.py::test_unknown_action_type_rejected PASSED          [ 89%]
-tests/test_sixth_skill_adds_no_engine_code.py::test_engine_models_and_proposal_builders_are_unchanged_since_the_fifth_skill PASSED [ 91%]
-tests/test_sixth_skill_adds_no_engine_code.py::test_registry_data_did_change_to_add_the_sixth_skill PASSED [ 92%]
-tests/test_sixth_skill_adds_no_engine_code.py::test_sixth_skill_is_declared_and_uses_only_existing_step_kinds PASSED [ 93%]
-tests/test_tool_catalog.py::test_revoke_access_step0_is_unambiguous PASSED [ 94%]
-tests/test_tool_catalog.py::test_recover_asset_step0_is_unambiguous PASSED [ 96%]
-tests/test_tool_catalog.py::test_policy_gated_ticket_step0_is_unambiguous PASSED [ 97%]
-tests/test_tool_catalog.py::test_policy_gated_ticket_step1_wrongly_repeats_search PASSED [ 98%]
-tests/test_tool_catalog.py::test_status_update_step0_wrongly_picks_lookup_employee PASSED [100%]
-
+........................................................................ [ 73%]
+..........................                                               [100%]
 =============================== warnings summary ===============================
 .venv/lib/python3.10/site-packages/opentelemetry/util/_importlib_metadata.py:32
   /mnt/c/Users/Manas/Downloads/Auto Job Applier/Total Job Application process flow/projects/multi-agent-adk-mcp-ops-workflow/.venv/lib/python3.10/site-packages/opentelemetry/util/_importlib_metadata.py:32: DeprecationWarning: SelectableGroups dict interface is deprecated. Use select.
@@ -113,4 +26,4 @@ tests/test_adk_agent_construction.py::test_each_specialist_toolset_exposes_only_
     check_feature_enabled()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-================= 79 passed, 44 warnings in 170.15s (0:02:50) ==================
+98 passed, 44 warnings in 155.77s (0:02:35)

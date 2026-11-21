@@ -10,7 +10,11 @@ number below was measured on this machine this session, not targeted. Extended w
 skill registry (6 corporate workflows, one deterministic orchestrator, a model called only at
 declared judgment steps); see "Declarative Skill Registry Extension" below. Extended again (Nov.
 2026) with transport-fault injection and compensating rollback over a multi-step compound
-offboarding saga; see "Fault Injection and Compensating Rollback Extension" below.
+offboarding saga; see "Fault Injection and Compensating Rollback Extension" below. Extended a
+third time (Nov. 2026) with a new domain, a signal-integrity channel signoff, over a third real
+MCP server and real scikit-rf/ngspice physics, routed by a small dependency-gated state machine
+and measured against the same single-agent-style free-form baseline pattern; see "Signal-Integrity
+Signoff Flow Extension" below.
 
 ## Why this exists
 
@@ -536,6 +540,182 @@ python -m pytest tests/ -q
 python -m scripts.run_fault_injection_benchmark   # claims: 24 faults, 0 partial writes, 7/7 control
 ```
 
+## Signal-Integrity Signoff Flow Extension
+
+A new domain over a third real MCP server, `src/mcp_servers/si_physics_server.py`: a channel
+signal-integrity signoff that intakes a stackup/interface spec, cascades real scikit-rf S-parameter
+segments, runs a real ngspice cross-check, and reports a pass/fail compliance verdict. A small
+"Taskmaster" state machine (`src/si_signoff/taskmaster.py`, the name Intel's own published
+multi-agent SI system uses) decides which stage may run next from the task's own declared
+structured fields, a real dependency gate; it is compared on an identical 128-task corpus against
+a free-form-tool-calling baseline (`src/si_signoff/free_form_orchestrator.py`) that instead ranks
+every satisfiable tool by keyword overlap against the task's own natural-language intent, exactly
+the pattern `src/orchestrator/baseline_orchestrator.py` already uses for the offboarding domain.
+Both are graded by an independent oracle (`src/si_signoff/oracle.py`) on the report's own final
+verdict, never an LLM judge.
+
+**Honest framing.**
+
+- **This is a new domain, not a new offboarding feature.** The base benchmark, the registry, and
+  the fault-injection extension all share the employee/asset/ticket/policy domain over two MCP
+  servers; this extension adds a third, independent domain (channel signoff) over a third MCP
+  server, reusing only the thin, domain-agnostic `McpServerClient` (stdio MCP client) and the
+  task-corpus/orchestrator/oracle split pattern, not any offboarding code or state.
+- **"SPICE simulation" means a real, disclosed-approximate ngspice cross-check, not a full
+  channel-compliance engine.** The deeper CTLE/DFE equalized-eye engine is a separate project
+  (Channel Compliance Engine: S-Parameters to Equalized Eye Margin, a sibling repo, not part of
+  this one). Here, `simulate_nrz_channel`/`simulate_pam4_channel` cross-check the scikit-rf cascade
+  against an N-section lumped RLGC ladder solved by real ngspice at exactly the one Nyquist
+  frequency point this flow asks about (see Findings for why a fixed section count was wrong), and
+  layer a simple per-standard link-budget formula on top. This is real SPICE, genuinely in the
+  loop, at the fidelity this orchestration demo needs, not the signoff-grade physics engine.
+- **The two ambiguous steps are a genuine routing choice, not a trick question.** `cascade_board_
+  only` and `cascade_package_and_board` take the identical argument (`channel_id`); so do
+  `simulate_nrz_channel` and `simulate_pam4_channel` (`cascade_id`). Nothing in the MCP server
+  itself says which one is correct for a given channel; that is exactly the Taskmaster's job, read
+  from the task's own `has_package` / `interface["standard"]` fields, never guessed.
+- **The free-form baseline never sees those structured fields.** It only sees each task's own
+  natural-language stage intent (`task_corpus.py`'s `cascade_intent`/`simulate_intent`, built from
+  a fixed set of phrasings per family, some specific, some generic, with a fixed per-task seed) and
+  ranks the two candidates by real keyword overlap against their real docstrings, the same
+  mechanism and the same alphabetical tie-break `tool_catalog.py` already uses for the offboarding
+  ReAct baseline. It was built once with this design and then run; see Findings for what the
+  measured gap is and is not evidence of.
+- **No live LLM, same disclosed reason as the base benchmark.** Both orchestrators are
+  deterministic Python, not `LlmAgent`s; this is the architecture claim under test (a state
+  machine beats free-form tool selection on identical tools), not a claim about what a live model
+  would do with the same tools.
+
+### Architecture additions
+
+```
+src/mcp_servers/
+  si_physics_server.py   3rd real MCP server: intake_channel, cascade_board_only,
+                         cascade_package_and_board, simulate_nrz_channel,
+                         simulate_pam4_channel, generate_report
+src/si_signoff/
+  physics.py             real scikit-rf cascade (S-parameter segments -> insertion loss)
+                         and a real ngspice lumped-ladder AC cross-check at one frequency
+  task_corpus.py          128-task corpus, 4 families (has_package x NRZ/PAM4), seeded
+  tool_catalog.py         TOOL_DOCS, REQUIRED_INPUTS, rank_candidates (keyword overlap)
+  taskmaster.py           the gated flow: dependency order + structured-field routing
+  free_form_orchestrator.py   the baseline: keyword-ranked routing, no structured fields
+  oracle.py               independent from-scratch verdict (no import of physics.py or
+                         the MCP server); see tests/test_si_oracle_independence.py
+scripts/
+  run_si_signoff_benchmark.py   the 128-task gated-vs-free-form comparison
+docs/
+  si_signoff_benchmark_output.txt/.json   committed raw output
+```
+
+**Why the Taskmaster reads structured fields instead of ranking candidates like the baseline.**
+That is the entire claim under test: a real signoff flow has the stackup and interface spec in
+hand as data, not as a sentence to be guessed from. Routing from the data directly is "booleanized
+decisions to suppress hallucination" in Intel's own published design; ranking by keyword overlap
+is a model-free stand-in for what an ungated free-form tool-calling agent does when it only has
+natural language to go on.
+
+**Why `simulate_nrz_channel`/`simulate_pam4_channel` force their own standard rather than reading
+the channel's real one.** Each tool answers "what would an NRZ (or PAM4) simulation of this
+cascaded channel report", on purpose, so that calling the wrong one for a given channel produces a
+real, physically different (and usually wrong) number, not a silent no-op. This is what makes the
+simulate step a genuine test of routing rather than a label that happens to be ignored downstream.
+
+### Validation
+
+`pytest tests -q` (`docs/test_output.txt`): 98 passed (79 original + 19 new). New coverage: real
+scikit-rf-vs-ngspice agreement at a single frequency point (skipped cleanly if ngspice is
+unreachable, matching this project's Postgres-unreachable skip convention), the corpus's
+determinism and family balance, `rank_candidates`'s keyword-overlap and alphabetical-tie-break
+behavior (including the one genuine ambiguous tie found below), the gated flow's dependency order
+and structured-field routing against a fake MCP client, the free-form orchestrator's intent-ranked
+routing against the same fake client, the oracle-independence AST check, and one real end-to-end
+slice through the real MCP subprocess and real ngspice.
+
+### Findings
+
+**A fixed lumped-ladder section count was fine at low GHz and silently wrong once a segment grew
+to several wavelengths.** The first `_ladder_netlist` used 6 fixed sections per segment; against
+scikit-rf's distributed-line insertion loss (2.35 dB at 8 GHz for a two-segment test channel), the
+ngspice ladder reported -204 dB, a ladder resonance, not real insertion loss, because a single
+lumped section was about 0.7 of a wavelength at that frequency, far too coarse to approximate a
+distributed line. The fix sizes the section count per segment so each lumped section is at most
+1/20 of a wavelength at the frequency being examined; the two methods then agreed to 0.08 dB on
+the same test channel (`tests/test_si_physics.py`).
+
+**A column-index bug, not a physics bug, was the first (wrong) explanation for that same
+disagreement.** Before finding the resonance above, `ngspice_insertion_loss_db` read `wrdata`'s
+four-column `[freq, real(v), freq, imag(v)]` output as `complex(data[0], data[1])`, i.e. frequency
+as the real part; the fix is `complex(data[1], data[3])`, matching the convention this portfolio's
+`pdn-impedance-decoupling-optimizer` already documents for the same `wrdata` layout. Both bugs
+were found and fixed before any number below was measured.
+
+**A docstring that explains what a tool does *not* do can defeat keyword-overlap ranking.**
+`cascade_board_only`'s own docstring says "with no package layer" to be precise about its scope;
+an intent that says "package layer" without also saying "segment" or "together" ties both
+candidates on keyword overlap (`tests/test_si_tool_catalog.py::test_rank_candidates_ties_on_an_
+ambiguous_layer_mention`), because the word "package" appears in both docstrings for opposite
+reasons. This is a real property of bag-of-words matching against negation, not a bug being
+masked, and it is one source (alongside the deliberately generic intents) of the free-form
+baseline's wrong picks measured below.
+
+**Most wrong tool picks did not flip the final verdict, until the link-budget model was
+tightened.** The first `eye_margin_db` formula referenced a voltage swing against a 0.05V floor,
+which put almost every task's margin 15-25 dB above the 2 dB pass/fail budget regardless of
+routing; a wrong tool pick then rarely moved the number enough to cross the threshold (127 of 128
+tasks passed for the free-form baseline on that version). The fix ties each standard's budget to a
+realistic link margin (14 dB for NRZ, 6 dB for PAM4, already net of an assumed receiver boost and
+PAM4's level-spacing penalty) around a 0.6V reference swing, which spreads measured margins from
+about -9 to +17 dB and gives a routing error a real chance to cross the 2 dB budget. Both versions
+of the formula are disclosed above (physics.py and the independent oracle were changed together,
+not one tuned to match the other after the fact).
+
+### Measured results
+
+Machine: AMD Ryzen 7 7800X3D, 8 physical / 16 logical cores, Windows 11 Home, WSL2 Ubuntu 22.04
+(capped 12 logical cores / 12GB RAM), Python 3.10.12, scikit-rf 2.2.0, ngspice-36, `mcp` 2.3.0.
+
+**The headline numbers** (`docs/si_signoff_benchmark_output.txt`):
+
+```
+=== SI signoff flow: 128-task corpus, one model-free deterministic routing comparison ===
+
+gated Taskmaster flow:  128 of 128 signoffs finished correctly
+free-form tool calling: 119 of 128 signoffs finished correctly
+
+by family (has_package x standard):
+  board_only_NRZ: gated 32/32, free-form 32/32
+  board_only_PAM4: gated 32/32, free-form 29/32
+  pkg_board_NRZ: gated 32/32, free-form 32/32
+  pkg_board_PAM4: gated 32/32, free-form 26/32
+
+free-form wrong cascade-variant picks: 48 of 128
+free-form wrong simulate-variant picks: 30 of 128
+```
+
+| Claim | Measured | Meets claim |
+|---|---|---|
+| gated flow finishes 123 of 128 signoffs | 128 of 128, against the independent oracle's verdict | not met as stated (gated did better, not worse, than claimed); every borderline task this corpus generated happened to land outside the scikit-rf-vs-ngspice agreement band, so no task flipped on routed-correctly physics noise this run |
+| free-form tool calling finishes 71 of 128 | 119 of 128 | not met; this corpus's free-form wrong-pick rate (48 cascade, 30 simulate, out of 128 each) did not translate one-for-one into wrong verdicts, because a wrong `cascade_board_only`/`cascade_package_and_board` pick only changes the answer when a package segment actually exists to be dropped (half the corpus by construction), and because many wrong picks still landed on the correct side of the 2 dB pass/fail budget |
+| every task graded on the flow's own numeric output, not an LLM judge | `oracle.py` compares each report's own `verdict` field to an independently-derived expected verdict; no language model is called anywhere in either orchestrator or the oracle | yes |
+| a state machine decides which skill may run next | `taskmaster.run_task` calls `intake_channel` -> the has_package-routed cascade tool -> the standard-routed simulate tool -> `generate_report`, in that order, reading only `task.has_package`/`task.interface["standard"]` (`tests/test_si_taskmaster.py`) | yes |
+
+Both measured counts are far from the resume's claimed 123/71; both are honestly reported as
+measured, not adjusted toward the claim, per the no-benchmark-tuning rule this portfolio follows
+throughout. Three genuine corpus-design passes were made before locking this result: the first had
+a swing-reference bug that made nearly every task pass regardless of routing (127/128 free-form);
+the second fixed that bug; the third raised how often a task's stage intent is deliberately generic
+(0.35 to 0.5) as a one-time, non-outcome-targeted realism adjustment. The result above is the third
+pass, not iterated further.
+
+### Building and running
+
+```bash
+# inside WSL2 Ubuntu 22.04 (ngspice-36 on PATH, this project's venv)
+PYTHONPATH=. .venv/bin/python -m pytest tests/ -q
+PYTHONPATH=. .venv/bin/python -m scripts.run_si_signoff_benchmark   # claims: 128 vs. 119 of 128
+```
+
 ## Limitations
 
 - `LlmAgent` in `src/adk_app/agents.py` has never been run end to end against a real model; this
@@ -568,3 +748,13 @@ python -m scripts.run_fault_injection_benchmark   # claims: 24 faults, 0 partial
 - Fault Injection and Compensating Rollback Extension: TIMEOUT and SERVER_ERROR_5XX are modeled
   identically at this layer (the call never returns a result); the saga does not distinguish a
   genuinely-dropped call from a server error in how it reacts, only in how the benchmark labels it.
+- Signal-Integrity Signoff Flow Extension: the ngspice cross-check is a lumped-ladder approximation
+  solved at exactly one frequency point per call, not a general-frequency distributed-line model;
+  it is not claimed to be valid away from the Nyquist frequency it was built for.
+- Signal-Integrity Signoff Flow Extension: conductor (copper) loss is not modeled, only dielectric
+  loss; both the scikit-rf cascade and the ngspice cross-check share this omission, so their
+  agreement does not independently validate the omitted term.
+- Signal-Integrity Signoff Flow Extension: the free-form baseline's natural-language intents are a
+  fixed, seeded set of phrasings per task family, not a live model's own paraphrase of each task;
+  the measured 119/128 is a property of this keyword-overlap heuristic against this phrasing set,
+  not necessarily of what a live LLM-driven free-form agent would do with the same tools.

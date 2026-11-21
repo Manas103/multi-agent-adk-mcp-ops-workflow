@@ -1,0 +1,29 @@
+{
+  "n_tasks": 128,
+  "gated_pass": 128,
+  "free_form_pass": 119,
+  "by_family": {
+    "board_only_NRZ": {
+      "n": 32,
+      "gated_pass": 32,
+      "free_form_pass": 32
+    },
+    "board_only_PAM4": {
+      "n": 32,
+      "gated_pass": 32,
+      "free_form_pass": 29
+    },
+    "pkg_board_NRZ": {
+      "n": 32,
+      "gated_pass": 32,
+      "free_form_pass": 32
+    },
+    "pkg_board_PAM4": {
+      "n": 32,
+      "gated_pass": 32,
+      "free_form_pass": 26
+    }
+  },
+  "free_form_wrong_cascade_picks": 48,
+  "free_form_wrong_simulate_picks": 30
+}
